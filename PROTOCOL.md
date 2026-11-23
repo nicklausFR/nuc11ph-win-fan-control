@@ -18,6 +18,43 @@ Dans un bloc, les positions 0/6 sont les sources thermiques, 1/7 les maximums en
 
 La commande avec canal 0 ne modifiait pas le bit manuel attendu. Le canal 2 acceptait un bit manuel à l’offset 28 sans réponse physique distincte démontrée. Seul le canal 1 partagé est exposé ; l’essai antérieur à 75 % avait fait monter les deux ventilateurs vers 2 500 tr/min.
 
+## Étude des deux canaux du 23 novembre 2026
+
+Cinq essais courts ont comparé `02 01 <pourcentage>` et `02 02 <pourcentage>`
+sur cette machine, avec les mêmes limites 50–99 %, CPU <85 °C / GPU <80 °C,
+un bail de 7 secondes et le processus de récupération C. Le moteur de recherche
+utilise un canal nommé distinct et n’a remplacé aucun binaire de production.
+Son canal 2 exige une relecture où seul l’octet 28 change ; les 94 octets
+de configuration initiale sont restaurés et comparés après chaque essai.
+La variante simulée a d’abord validé cet offset, l’expiration et le retour thermique.
+
+Deux plateaux ont atteint leur durée prévue de 4 secondes. Les tr/min ci-dessous
+sont les médianes de six relevés avant la commande et des six derniers relevés
+pendant celle-ci :
+
+| Canal de commande | Consigne | CPU avant → fin | GPU NVIDIA avant → fin | Résultat |
+| --- | --- | --- | --- | --- |
+| 1 | 65 % | 1 514 → 2 065 | 1 481 → 2 033 | Les deux ventilateurs accélèrent |
+| 2 | 90 % | 1 778 → 1 806 | 1 739 → 1 765 | Pas de réponse distincte significative observée |
+
+Le canal 2 à 65 % et le canal 1 à 90 % ont été interrompus par la protection
+thermique ; un premier essai du canal 2 à 90 % a été refusé pour la même raison.
+Ces essais incomplets ne sont pas utilisés comme plateaux stabilisés.
+La restauration exacte est confirmée après les cinq essais, et l’interface a
+été relancée avec la régulation automatique.
+
+L’analyse statique de `PerformanceTuningLibrary.dll` confirme les champs
+`FanDuty.nucEcSection`, `fanNumber` et `fanDuty`. Les types des mesures
+`CPUFan=1` et `dGPUFan=2` ne prouvent pas une correspondance avec `fanNumber`.
+Une consigne relue sur le second canal logique n’est donc pas une preuve de
+contrôle du ventilateur GPU. Aucun réglage indépendant CPU/GPU n’est validé
+par ces essais ; ce résultat n’établit pas une impossibilité matérielle et ne
+couvre pas tous les protocoles éventuels du firmware.
+
+Mesures brutes locales : `test-results/fan-independence/hardware-study.json`.
+La copie des sources expérimentales, les contrôles sur simulateur et leurs
+empreintes sont conservés à côté du rapport, hors distribution courante.
+
 Tr/min : six enregistrements de trois octets, type puis entier non signé 16 bits big-endian. Types reconnus : 1 CPU, 2 GPU NVIDIA, 3/4 système, 5 pompe, 7 second CPU.
 
 Températures : octet 0 GPU NVIDIA, octet 1 CPU, octet 2 GPU intégré, en °C selon les fonctions OEM identifiées. Les douze autres octets ne sont pas interprétés. Les valeurs nulles ou hors plage sont déclarées indisponibles.

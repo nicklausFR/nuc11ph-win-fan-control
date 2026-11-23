@@ -1,6 +1,32 @@
-# NUC Engine 0.3 — moteur C, interface Python séparée
+# NUC11phi7 Cooling — interface Qt et moteur C
 
-Le matériel et les garde-fous sont désormais gérés par un **exécutable C17 Windows x64 autonome**. Le fichier `python/nuc_client.py` est le client destiné à la future interface Python : il transporte des commandes, sans accès direct au matériel. Aucune interface graphique n’est encore incluse.
+[English documentation](README.md)
+
+Le matériel et les garde-fous sont gérés par un **exécutable C17 Windows x64 autonome**. Le fichier `python/nuc_client.py` transporte les commandes sans accès direct au matériel. **NUC Cooling**, dans `ui/`, fournit un panneau Python/Qt dans le systray : températures CPU/GPU/SSD, charges CPU et GPU NVIDIA, vitesses des ventilateurs, sélection des profils et ventilation forcée.
+
+## Interface dans le systray
+
+```powershell
+python -m pip install -r ui/requirements.txt
+python ui/app.py --show
+```
+
+L’interface se connecte au moteur existant ou le lance avec `--allow-write`. Aucun
+mode n’est appliqué avant un clic sur **Appliquer** ; `--read-only` désactive les commandes. Un clic
+sur l’icône affiche le panneau ; l’option Épingler du menu le garde au premier plan.
+Les options proposent les thèmes clair/sombre/automatique, une actualisation de
+1, 2 ou 5 s et le choix **Français / English / Langue de Windows**. La traduction
+est immédiate et mémorisée ; elle conserve les réglages de ventilation en cours.
+Par défaut, Windows français donne le français et les autres langues donnent l’anglais.
+Le nom du profil correspond aux paramètres exposés par le catalogue du moteur.
+Les mesures indisponibles affichent « — » et la reconnexion est automatique.
+Les profils Silencieux/Équilibré/Refroidissement et la consigne commune forcée de
+50 à 99 % utilisent les sessions et garde-fous du moteur. Le renouvellement est
+indépendant de l’affichage ; la fermeture restaure la configuration initiale.
+
+Pour un exécutable sans Python : installer `ui/requirements-build.txt`, puis lancer
+`python tools/build_ui.py`. Ouvrir `dist/nuc-cooling.exe` avec `dist/nuc-engine.exe`
+à côté. [Documentation de l’interface](ui/README.fr.md).
 
 Le moteur utilise uniquement le pilote **Intel PerformanceDriver déjà installé** et les API Windows. Il n’installe aucun pilote, ne charge aucune DLL OEM, n’utilise pas WinRing0 et ne réactive pas NUC Software Studio. Python n’est pas nécessaire pour faire fonctionner le moteur C.
 
@@ -23,7 +49,7 @@ python examples\demo.py --watch
 .\nuc-engine.exe serve --allow-write
 ```
 
-Depuis les sources, le code C et sa compilation sont dans `fan-control/`, avec l’exécutable dans `fan-control\build\nuc-engine.exe`. Le client API reste dans `python/` et `ui/` est réservé à la future interface graphique. Le script `build.ps1` à la racine lance la compilation du moteur. Arrêt normal en console : `Ctrl+C`. La fermeture demande la restauration de la configuration sauvegardée.
+Depuis les sources, le code C et sa compilation sont dans `fan-control/`, avec l’exécutable dans `fan-control\build\nuc-engine.exe`. Le client API reste dans `python/` et l’interface Qt dans `ui/`. Le script `build.ps1` à la racine lance la compilation du moteur. Arrêt normal en console : `Ctrl+C`. La fermeture demande la restauration de la configuration sauvegardée.
 
 Dans une autre console, avec Python 64 bits ≥ 3.11 :
 
@@ -34,7 +60,7 @@ python python\nuc_client.py --watch
 
 Le client de diagnostic ne fait que lire. Aucun serveur HTTP, port réseau ou jeton sur disque n’est utilisé. Le canal nommé `\\.\pipe\NucControl.v1.<SID>` est limité au compte Windows propriétaire et à SYSTEM ; les connexions distantes sont refusées. Un seul moteur peut posséder ce canal.
 
-## Client pour la future interface
+## Client Python et interface
 
 Ajouter le dossier `python` au chemin des modules de l’application, puis :
 

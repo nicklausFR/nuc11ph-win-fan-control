@@ -17,7 +17,12 @@ def main():
     common += [(ROOT/name,name) for name in ("README.md","README.fr.md","API.md","PROTOCOL.md","LICENSE","Install-Service.ps1","Uninstall-Service.ps1")]
     common += [(ROOT/"python"/"nuc_client.py","python/nuc_client.py")]
     common += [(path,"examples/"+path.name) for path in sorted((ROOT/"examples").glob("*.py"))]
-    common += [(ROOT/"fan-control"/"README.md","fan-control/README.md"),(ROOT/"ui"/"README.md","ui/README.md")]
+    common += [(ROOT/"fan-control"/"README.md","fan-control/README.md")]
+    common += [(path,path.relative_to(ROOT).as_posix()) for path in sorted((ROOT/"ui").iterdir())
+               if path.is_file() and path.suffix in (".py",".md",".txt")]
+    common += [(ROOT/"tools"/"build_ui.py","tools/build_ui.py")]
+    if (ROOT/"dist"/"nuc-cooling.exe").is_file():
+        common += [(ROOT/"dist"/"nuc-cooling.exe","nuc-cooling.exe")]
     sources = [(ROOT/"build.ps1","build.ps1"),(ROOT/"fan-control"/"build.ps1","fan-control/build.ps1")]
     for directory in ("fan-control/src","tests","tools"):
         sources += [(path,path.relative_to(ROOT).as_posix()) for path in (ROOT/directory).rglob("*")
@@ -26,6 +31,7 @@ def main():
     results = {}
     for label,files in (("windows-x64",common+engine_sources),("source",common+sources)):
         path = destination/f"nuc-engine-{VERSION}-{label}.zip"
+        files = list({name:(file,name) for file,name in files}.values())
         hashes = {name:hashlib.sha256(file.read_bytes()).hexdigest() for file,name in files}
         with zipfile.ZipFile(path,"w",zipfile.ZIP_DEFLATED) as archive:
             for file,name in sorted(files,key=lambda pair:pair[1]):
