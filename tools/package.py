@@ -29,7 +29,8 @@ def main():
                     if path.is_file() and path.suffix in (".c",".h",".py") and "__pycache__" not in path.parts]
     engine_sources = [(path,name) for path,name in sources if name=="build.ps1" or name.startswith("fan-control/")]
     results = {}
-    for label,files in (("windows-x64",common+engine_sources),("source",common+sources)):
+    source_common = [(path,name) for path,name in common if path.suffix.lower() != ".exe"]
+    for label,files in (("windows-x64",common+engine_sources),("source",source_common+sources)):
         path = destination/f"nuc-engine-{VERSION}-{label}.zip"
         files = list({name:(file,name) for file,name in files}.values())
         hashes = {name:hashlib.sha256(file.read_bytes()).hexdigest() for file,name in files}
