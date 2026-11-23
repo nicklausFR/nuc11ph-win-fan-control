@@ -47,9 +47,12 @@ Writes require the exact board, BIOS and driver SHA-256 pinned in
 
 ## Quick start
 
-Extract the Windows x64 package and run **`nuc-cooling.exe`**. Keep
-**`nuc-engine.exe`** in the same directory. The app connects to an existing engine
-or starts it in the background with `--allow-write`.
+Start with the [source instructions](#run-from-source): Python x64 3.11+ and
+the native engine built with MSVC are required. A standalone Windows executable
+can optionally be [built locally](#build).
+
+The app connects to an existing engine or starts it in the background with
+`--allow-write`.
 
 Click the tray icon to show or hide the panel. Right-click the icon, or open **⋮**,
 to choose appearance, refresh interval, language, panel pinning or **Quit**.
